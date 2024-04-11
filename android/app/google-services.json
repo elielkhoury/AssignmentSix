@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "352114509774",
+    "project_id": "assignmentsix-453e2",
+    "storage_bucket": "assignmentsix-453e2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:352114509774:android:d8fb16f8dc1e5016168d9f",
+        "android_client_info": {
+          "package_name": "com.assignmentsix"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfR5tGNSjct9eZocBhawKvM-JXC7CV9Cw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
