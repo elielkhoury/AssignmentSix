@@ -2,17 +2,21 @@ import React, {useEffect, useState} from 'react';
 import {Image, LogBox} from 'react-native';
 import {
   NavigationContainer,
-  getFocusedRouteNameFromRoute,
+  ParamListBase,
+  RouteProp,
 } from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {Provider} from 'react-redux';
-import rootReducer from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/redux/reducers';
-import LoginScreen from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/components/auth/Login';
-import RegisterScreen from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/components/auth/Register';
-import MainScreen from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/components/Main';
-import {container} from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/components/style';
+import rootReducer from './src/redux/reducers';
+import LoginScreen from './src/components/auth/Login';
+import RegisterScreen from './src/components/auth/Register';
+import MainScreen from './src/components/Main';
+import {container} from './src/components/style';
 import {configureStore} from '@reduxjs/toolkit';
-import {auth} from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/services/firebaseConfig';
+import {auth} from './src/services/firebaseConfig';
+
+// Initialize Firebase outside of the component, this will run as the module is imported
+import './src/services/firebaseConfig';
 
 const store = configureStore({
   reducer: rootReducer,
@@ -28,10 +32,12 @@ const App: React.FC = () => {
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
+    // No need to initialize Firebase here, it's done in firebaseConfig.ts
     const unsubscribe = auth.onAuthStateChanged(user => {
       setLoaded(true);
       setLoggedIn(!!user);
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -39,7 +45,7 @@ const App: React.FC = () => {
     return (
       <Image
         style={container.splash}
-        source={require('/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/assets/img/logo.png')}
+        source={require('./src/assets/img/logo.png')}
       />
     );
   }
@@ -63,6 +69,18 @@ const App: React.FC = () => {
     );
   }
 
+  function getFocusedRouteNameFromRoute(
+    _route: RouteProp<ParamListBase, 'Main'>,
+  ):
+    | string
+    | ((props: {
+        children: string;
+        tintColor?: string | undefined;
+      }) => React.ReactNode)
+    | undefined {
+    throw new Error('Function not implemented.');
+  }
+
   return (
     <Provider store={store}>
       <NavigationContainer>
@@ -70,12 +88,9 @@ const App: React.FC = () => {
           <Stack.Screen
             name="Main"
             component={MainScreen}
-            options={({route}) => {
-              const routeName = getFocusedRouteNameFromRoute(route) ?? 'Feed';
-              return {
-                headerTitle: routeName,
-              };
-            }}
+            options={({route}) => ({
+              headerTitle: getFocusedRouteNameFromRoute(route) ?? 'Feed',
+            })}
           />
         </Stack.Navigator>
       </NavigationContainer>
