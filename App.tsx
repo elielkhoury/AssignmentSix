@@ -1,22 +1,16 @@
 import React, {useEffect, useState} from 'react';
 import {Image, LogBox} from 'react-native';
-import {
-  NavigationContainer,
-  ParamListBase,
-  RouteProp,
-} from '@react-navigation/native';
+import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {Provider} from 'react-redux';
 import rootReducer from './src/redux/reducers';
 import LoginScreen from './src/components/auth/Login';
 import RegisterScreen from './src/components/auth/Register';
 import MainScreen from './src/components/Main';
+import Home from './src/admin/components/Home'; // Make sure the path is correct
 import {container} from './src/components/style';
 import {configureStore} from '@reduxjs/toolkit';
-import {auth} from './src/services/firebaseConfig';
-
-// Initialize Firebase outside of the component, this will run as the module is imported
-import './src/services/firebaseConfig';
+import auth from './src/services/firebaseConfig';
 
 const store = configureStore({
   reducer: rootReducer,
@@ -32,10 +26,13 @@ const App: React.FC = () => {
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
-    // No need to initialize Firebase here, it's done in firebaseConfig.ts
-    const unsubscribe = auth.onAuthStateChanged(user => {
-      setLoaded(true);
-      setLoggedIn(!!user);
+    const unsubscribe = auth().onAuthStateChanged(user => {
+      try {
+        setLoaded(true);
+        setLoggedIn(!user);
+      } catch (error) {
+        console.error('Error setting auth state:', error);
+      }
     });
 
     return () => unsubscribe();
@@ -64,34 +61,21 @@ const App: React.FC = () => {
             component={LoginScreen}
             options={{headerShown: false}}
           />
+          <Stack.Screen
+            name="Home"
+            component={Home}
+            options={{headerShown: false}}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     );
-  }
-
-  function getFocusedRouteNameFromRoute(
-    _route: RouteProp<ParamListBase, 'Main'>,
-  ):
-    | string
-    | ((props: {
-        children: string;
-        tintColor?: string | undefined;
-      }) => React.ReactNode)
-    | undefined {
-    throw new Error('Function not implemented.');
   }
 
   return (
     <Provider store={store}>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Main">
-          <Stack.Screen
-            name="Main"
-            component={MainScreen}
-            options={({route}) => ({
-              headerTitle: getFocusedRouteNameFromRoute(route) ?? 'Feed',
-            })}
-          />
+          <Stack.Screen name="Main" component={MainScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </Provider>

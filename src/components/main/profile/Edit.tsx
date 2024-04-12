@@ -9,8 +9,8 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import {launchImageLibrary} from 'react-native-image-picker';
+import auth from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/services/firebaseConfig';
 import {
-  auth,
   db,
   storage,
 } from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/services/firebaseConfig';
@@ -48,18 +48,20 @@ function Edit(props: {
 
   // Function to save the updated user profile.
   const Save = async () => {
-    if (!auth.currentUser) {
+    // Get the currentUser and ensure it exists before proceeding
+    const currentUser = auth().currentUser;
+
+    if (!currentUser) {
       console.error('No signed-in user available.');
       return;
     }
 
-    // If the image was changed, upload the new image to Firebase Storage.
+    // Proceed with the rest of the function if currentUser is not null
     if (imageChanged && image) {
       const uri = image;
-      const childPath = `profile/${auth.currentUser.uid}`;
+      const childPath = `profile/${currentUser.uid}`;
       const storageRef = ref(storage, childPath);
 
-      // Fetch the blob and upload, then update profile with downloadURL
       const response = await fetch(uri);
       const blob = await response.blob();
 
@@ -73,18 +75,19 @@ function Edit(props: {
     }
   };
 
-  // Function to update Firestore with the new profile data.
   const updateProfile = async (data: {
     name: any;
     description: any;
     image?: string;
   }) => {
-    if (!auth.currentUser) {
+    const currentUser = auth().currentUser;
+
+    if (!currentUser) {
       console.error('No signed-in user available for profile update.');
       return;
     }
 
-    const userRef = doc(db, 'users', auth.currentUser.uid);
+    const userRef = doc(db, 'users', currentUser.uid);
     await updateDoc(userRef, data);
     props.updateUserFeedPosts();
     props.navigation.goBack();

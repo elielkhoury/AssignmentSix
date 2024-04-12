@@ -1,4 +1,4 @@
-import {auth} from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/services/firebaseConfig';
+import auth from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/services/firebaseConfig';
 
 function timeDifference(current: number, previous: number) {
   var msPerMinute = 60 * 1000;
@@ -26,7 +26,7 @@ function timeDifference(current: number, previous: number) {
 
 export const getCurrentUserUid = () => {
   // Using the imported auth instance
-  return auth.currentUser?.uid || null;
+  return auth().currentUser?.uid || null;
 };
 
 export {timeDifference};

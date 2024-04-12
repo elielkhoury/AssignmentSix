@@ -7,8 +7,7 @@ import {
 } from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/components/style';
 
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {auth} from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/services/firebaseConfig';
-import {createUserWithEmailAndPassword} from 'firebase/auth';
+import auth from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/services/firebaseConfig';
 import {
   doc,
   setDoc,
@@ -50,7 +49,6 @@ export default function Register({navigation}: Props) {
   });
 
   const onRegister = () => {
-    // Validation before attempting to register the user.
     if (!name || !username || !email || !password) {
       setIsValid({boolSnack: true, message: 'Please fill out all fields.'});
       return;
@@ -63,37 +61,32 @@ export default function Register({navigation}: Props) {
       return;
     }
 
-    // Checking for unique username before proceeding with registration.
     const usersRef = collection(db, 'users');
     const q = query(usersRef, where('username', '==', username));
     getDocs(q)
       .then(snapshot => {
         if (snapshot.empty) {
-          // Proceed with registration if username is unique.
-          createUserWithEmailAndPassword(auth, email, password)
+          auth()
+            .createUserWithEmailAndPassword(email, password)
             .then(userCredential => {
-              // Create a user document in Firestore upon successful authentication.
               setDoc(doc(db, 'users', userCredential.user.uid), {
                 name,
                 email,
                 username,
-                image: 'default', // Using a placeholder for the user image initially.
+                image: 'default',
                 followingCount: 0,
                 followersCount: 0,
               });
-              navigation.navigate('Login'); // Navigate to login screen after registration.
+              navigation.navigate('Login');
             })
             .catch(error => {
-              // Handle errors like email already in use.
               setIsValid({boolSnack: true, message: error.message});
             });
         } else {
-          // Inform user if username is taken.
           setIsValid({boolSnack: true, message: 'Username is already taken.'});
         }
       })
       .catch(error => {
-        // General error handling, for instance network issues.
         setIsValid({boolSnack: true, message: error.message});
       });
   };

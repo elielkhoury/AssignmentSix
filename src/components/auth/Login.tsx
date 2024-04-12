@@ -1,26 +1,21 @@
 import React, {useState} from 'react';
 import {Button, Text, TextInput, View} from 'react-native';
-import {
-  container,
-  form,
-} from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/components/style';
+import {container, form} from '../style';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {auth} from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/services/firebaseConfig';
-import {signInWithEmailAndPassword} from 'firebase/auth';
+import auth from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/services/firebaseConfig';
 
 type Props = {
   navigation: NativeStackNavigationProp<any>;
 };
 
 export default function Login({navigation}: Props) {
-  // Using local state to handle user inputs for email and password.
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
-  // Function to handle the sign-in process using Firebase Authentication.
   const onSignUp = () => {
-    signInWithEmailAndPassword(auth, email, password)
-      .then(userCredential => {
+    auth()
+      .signInWithEmailAndPassword(email.trim(), password)
+      .then((userCredential: {user: any}) => {
         // Signed in
         const user = userCredential.user;
         console.log('Logged in with:', user.email);
@@ -48,10 +43,9 @@ export default function Login({navigation}: Props) {
         />
         <Button onPress={onSignUp} title="Sign In" />
       </View>
-      {/* Option for users to navigate to the registration screen if they don't have an account. */}
       <View style={form.bottomButton}>
         <Text onPress={() => navigation.navigate('Register')}>
-          Don't have an account? SignUp.
+          Don't have an account? Sign Up.
         </Text>
       </View>
     </View>

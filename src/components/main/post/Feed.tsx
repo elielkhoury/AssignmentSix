@@ -21,33 +21,33 @@ interface PostType {
 
 const Feed: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
-  const {feed} = useSelector((state: RootState) => state.usersState); // Accessing the feed from Redux state.
-  const [refreshing, setRefreshing] = useState<boolean>(false); // State to control the refresh indicator.
-  const [posts, setPosts] = useState<PostType[]>([]); // Local state for posts, including mute status.
+  const {feed} = useSelector((state: RootState) => state.usersState);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [posts, setPosts] = useState<PostType[]>([]);
 
   // Effect to update posts whenever the feed changes.
   useEffect(() => {
     // Mapping the feed to include a default muted status.
     const updatedPosts = feed.map(post => ({
       id: post.id,
-      caption: post.description, // Using the description as caption.
-      isMuted: true, // Defaulting posts to muted.
+      caption: post.description,
+      isMuted: true,
     }));
-    setPosts(updatedPosts); // Updating local state.
+    setPosts(updatedPosts);
   }, [feed]);
 
   // Function to handle pull-to-refresh action.
   const onRefresh = () => {
     setRefreshing(true);
-    dispatch(reload()); // Dispatching an action to reload the feed.
-    setRefreshing(false); // Resetting refresh state after dispatch.
+    dispatch(reload());
+    setRefreshing(false);
   };
 
   // Function to toggle the mute status of a post.
   const toggleMuteStatus = (postId: string) => {
     setPosts(currentPosts =>
       currentPosts.map(
-        post => (post.id === postId ? {...post, isMuted: !post.isMuted} : post), // Toggling the isMuted property.
+        post => (post.id === postId ? {...post, isMuted: !post.isMuted} : post), // Toggling the isMuted
       ),
     );
   };

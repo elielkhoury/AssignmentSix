@@ -1,7 +1,9 @@
+// firebaseConfig.ts
 import {initializeApp} from 'firebase/app';
 import {getFirestore} from 'firebase/firestore';
 import {getStorage} from 'firebase/storage';
-import {getAuth} from 'firebase/auth';
+import {getAuth as getFirebaseAuth} from 'firebase/auth';
+import auth from '@react-native-firebase/auth';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBiumTd_8AOtlIkvrBfePMFQEV3ZrxTHwo',
@@ -16,7 +18,11 @@ const firebaseConfig = {
 // Initialize Firebase
 initializeApp(firebaseConfig);
 
-// Export Firebase services
+// Export Firebase services using the JS SDK
 export const db = getFirestore();
 export const storage = getStorage();
-export const auth = getAuth();
+export const firebaseAuth = getFirebaseAuth();
+
+// Export the auth instance from @react-native-firebase/auth
+// This is already initialized, and you can use it directly in your application.
+export default auth;

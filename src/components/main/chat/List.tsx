@@ -9,8 +9,7 @@ import {
   text,
   utils,
 } from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/components/style';
-import 'firebase/firestore';
-import {auth} from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/services/firebaseConfig';
+import auth from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/services/firebaseConfig';
 
 interface User {
   uid: string;
@@ -37,7 +36,7 @@ const ChatList = (props: ChatListProps) => {
 
   useEffect(() => {
     const newChats = props.chats.map(chat => {
-      const otherUserId = chat.users.find(id => id !== auth.currentUser?.uid);
+      const otherUserId = chat.users.find(id => id !== auth().currentUser?.uid);
       const otherUser = props.users.find(user => user.uid === otherUserId);
       return {...chat, otherUser};
     });

@@ -1,7 +1,6 @@
-import {
-  db,
-  auth,
-} from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/services/firebaseConfig';
+import auth from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/services/firebaseConfig';
+import {db} from '/Users/elieelkhoury/Desktop/Eurisko/AssignmentSix/src/services/firebaseConfig';
+
 import {
   doc,
   getDoc,
@@ -39,42 +38,45 @@ export const reload = () => async (dispatch: any) => {
   dispatch(fetchUserChats());
 };
 
+// Example of correct usage in fetchUser action
 export const fetchUser = () => async (dispatch: any) => {
-  if (auth.currentUser) {
-    const userRef = doc(db, 'users', auth.currentUser.uid);
+  const currentUser = auth().currentUser; // Correctly calling auth() to get the FirebaseAuth instance
+  if (currentUser) {
+    const userRef = doc(db, 'users', currentUser.uid);
     const userSnap = await getDoc(userRef);
 
     if (userSnap.exists()) {
       dispatch({
         type: USER_STATE_CHANGE,
-        currentUser: {uid: auth.currentUser.uid, ...userSnap.data()},
+        currentUser: {uid: currentUser.uid, ...userSnap.data()},
       });
     }
   }
 };
 
-// Fetch current user's posts
+// Ensure all other instances where auth.currentUser is used are also updated
 export const fetchUserPosts = () => async (dispatch: any) => {
-  if (auth.currentUser) {
+  const currentUser = auth().currentUser; // Corrected usage
+  if (currentUser) {
     const postsQuery = query(
-      collection(db, 'posts', auth.currentUser.uid, 'userPosts'),
+      collection(db, 'posts', currentUser.uid, 'userPosts'),
       orderBy('creation', 'desc'),
     );
     const querySnapshot = await getDocs(postsQuery);
     // eslint-disable-next-line @typescript-eslint/no-shadow
     const posts = querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-
     dispatch({type: USER_POSTS_STATE_CHANGE, posts});
   }
 };
 
 // Fetch list of users current user is following
 export const fetchUserFollowing = () => async (dispatch: any) => {
-  if (auth.currentUser) {
+  const currentUser = auth().currentUser;
+  if (currentUser) {
     const followingQuery = collection(
       db,
       'following',
-      auth.currentUser.uid,
+      currentUser.uid,
       'userFollowing',
     );
     const querySnapshot = await getDocs(followingQuery);
@@ -134,10 +136,11 @@ export const sendNotification = async (
 
 // Fetch user chats from Firestore and observe for real-time updates
 export const fetchUserChats = () => async (dispatch: any) => {
-  if (auth.currentUser) {
+  const currentUser = auth().currentUser; // Correct usage
+  if (currentUser) {
     const chatsQuery = query(
       collection(db, 'chats'),
-      where('users', 'array-contains', auth.currentUser.uid),
+      where('users', 'array-contains', currentUser.uid),
     );
     onSnapshot(chatsQuery, snapshot => {
       // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -170,26 +173,32 @@ export const deletePost =
 export const updateUserFeedPosts =
   () =>
   async (dispatch: (arg0: {type: string; posts: {id: string}[]}) => void) => {
-    if (!auth.currentUser) {
+    const currentUser = auth().currentUser; // Correctly accessing currentUser
+
+    if (!currentUser) {
       console.error('No authenticated user found.');
       return;
     }
 
-    const uid = auth.currentUser.uid;
+    const uid = currentUser.uid;
     const postsRef = collection(db, 'posts', uid, 'userPosts');
     const q = query(postsRef, where('uid', '==', uid));
 
-    const querySnapshot = await getDocs(q);
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    const posts = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    try {
+      const querySnapshot = await getDocs(q);
+      // eslint-disable-next-line @typescript-eslint/no-shadow
+      const posts = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-    dispatch({
-      type: USER_POSTS_STATE_CHANGE,
-      posts,
-    });
+      dispatch({
+        type: USER_POSTS_STATE_CHANGE,
+        posts,
+      });
+    } catch (error) {
+      console.error('Failed to fetch posts:', error);
+    }
   };
 
 // Search for users by username
